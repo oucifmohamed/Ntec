@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TP4</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+        <script src ="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.9/angular.min.js" type="text/javascript"></script>
+        <script type="text/javascript">
+            var app = angular.module("mailApp",[]);
+           app.controller("mailcontroller",function($scope,$http){
+               $scope.searchText="";
+               $http({
+                   url:'Mailservlet',
+                   method:"GET",
+               }).then(function(response){
+                   $scope.mailList=response.data;
+                   console.log($scope.mailList);
+               },function(response){
+                   
+               });
+               
+               $scope.search=function(emp){
+                   //console.log(emp.mailid);
+                   var txt = $scope.searchText;
+                   //txt = txt.toLowerCase();
+                   if(emp.expediteur.toLowerCase().includes(txt.toLowerCase())){
+                       return true;
+                   }
+                   return false;
+               }
+               
+               $http.defaults.headers.post["Content-Type"] = "application/json";
+               $scope.addmail=function(){
+                   $http({
+                        url : 'Mailservlet',
+                        method : "POST",
+                   data : {
+                       'mailid' : $scope.mailid,
+                       'expediteur' : $scope.mailexpediteur,
+                       'destinataire' : $scope.maildestinataire,
+                       'objet' : $scope.mailobjet,
+                       'sujet' : $scope.mailsujet
+                      }
+                   }).then(function(){
+                       //alert("kiss my asss");
+                       $http({
+                         url:'Mailservlet',
+                         method:"GET",
+               }).then(function(response){
+                   $scope.mailList=response.data;
+                   console.log($scope.mailList);
+               },function(response){
+                   
+               });
+                   });
+                  
+               }
+               
+               $scope.deleteData=function(emp){
+                   alert(emp.expediteur);
+                   $http({
+                       url:'Mailservlet',
+                       method:"DELETE",
+                       data : {
+                           'expediteur' : emp.expediteur
+                       }
+                   }).then(function(){
+                        $http({
+                         url:'Mailservlet',
+                         method:"GET",
+               }).then(function(response){
+                   $scope.mailList=response.data;
+                   console.log($scope.mailList);
+               },function(response){
+                   
+               });
+                   });
+               }
+  });
+          
+        </script>
+    </head>
+    <body ng-app="mailApp" ng-controller="mailcontroller">
+        <div class="form-group">
+     
+      <form ng-submit="addmail()">
+      <div class="form-group">   
+      <label>MailId: </label> 
+      <input class="form-control" type="text" id="Id" name="Id" ng-model="mailid" placeholder="MailId">
+      </div>
+      <br><br>
+      <div class="form-group">
+      <label>Expediteur:</label>
+      <input class="form-control" type="text" id="expediteur" name="expediteur" ng-model="mailexpediteur" placeholder="MailExpediteur">
+      </div>
+      <br><br>
+      <div class="form-group">
+      <label>Destinataire:</label>
+      <input class="form-control" type="text" id="destinataire" name="destinataire" ng-model="maildestinataire" placeholder="MailDestinataire">
+      </div>
+      <br><br>
+      <div class="form-group">
+      <label>Objet:</label>
+      <input class="form-control" type="text" id="objet" name="objet" ng-model="mailobjet" placeholder="MailObjet">
+      </div>
+      <br><br>
+      <div class="form-group">
+      <label>Sujet:</label>
+      <input class="form-control" type="text" id="sujet" name="sujet" ng-model="mailsujet" placeholder="MailSujet">
+      </div>
+      <br><br>
+      <button ng-click="addmail()" class="btn btn-dark">Add</button>
+      
+      <br/>
+    </form>
+            <br><br><br>  
+        <p>Search:</p><input placeholder="enter" type="text" ng-model="searchText" align="right"/>
+        <table align="center" border=2px>
+            <tr>
+              <th>Id</th>
+              <th>Expediteur</th>
+              <th>Destinataire</th>
+              <th>Objet</th>
+              <th>Sujet</th>         
+            </tr>
+       
+            <tr ng-repeat="emp in mailList | filter:search" class="table table-bordered">
+                <td>{{emp.mailid}}</td>
+                <td>{{emp.expediteur}}</td>
+                <td>{{emp.destinataire}}</td>
+                <td>{{emp.objet}}</td>
+                <td>{{emp.sujet}}</td>
+                <td><button ng-click="deleteData(emp)">Delete</button></td>
+            </tr>
+        </table>
+        </div>
+    </body>
+</html>
